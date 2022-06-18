@@ -1,7 +1,9 @@
 const express = require('express');
 const app = express();
+app.use(express.json());
 
-const notes = [
+
+let notes = [
     {
         id: 1,
         'content': 'HTML is easy',
@@ -32,7 +34,7 @@ app.get('/api/notes', (req, res) => {
                     // : dinamic route  
 app.get('/api/notes/:id', (req, res) => {
     const id = Number(req.params.id);
-    const note = notes.find(note => note.id === id);
+    const note = notes.find(identifier => identifier.id === id);
     note ? res.json(note) : res.status(404).end();
 });
 
@@ -42,6 +44,26 @@ app.delete('/api/notes/:id', (req, res) => {
     res.status(204).end();
 });
 
+app.post('/api/notes', (req, res) => {
+    const note = req.body;
+    
+    const ids = notes.map(identifier => identifier.id);
+    const maxId = Math.max(...ids);
+
+    if (!note || !note.content) {
+        return res.status(400).json({ error: 'content missing' });
+    } 
+
+    const newNote = {
+        id: maxId + 1,
+        content: note.content,
+        date: new Date(),
+        important: typeof note.important !== "undefined" ? note.important : false
+    }
+    //notes.push(newNote);
+    notes = [...notes, newNote];
+    res.statusCode(201).json(newNote);
+});
 
 
 const PORT = 3001;
